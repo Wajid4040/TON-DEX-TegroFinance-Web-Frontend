@@ -364,14 +364,7 @@ export default function SwapPage() {
               </Form.Group>
               <ListGroup className="list-unstyled bg-light p-3 rounded-8 mb-4">
                 <ListGroup.Item className="d-flex mb-2">
-                  <span className="me-auto fw-500">{t("swap.price")}</span>
-                  <span className="color-grey">
-                    {`${(realPrice ?? "0")
-                      .toFixed(fromAsset?.decimals)
-                      .slice(0, 15)} ${fromAsset?.symbol} ${t("swap.per")} 1 ${
-                      toAsset?.symbol
-                    }`}
-                  </span>
+                  
                 </ListGroup.Item>
                 <ListGroup.Item className="d-flex mb-2">
                   <span className="me-auto fw-500">

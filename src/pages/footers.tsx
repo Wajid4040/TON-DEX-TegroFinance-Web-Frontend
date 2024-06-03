@@ -4,7 +4,7 @@ export function DefaultFooter() {
       <footer className="footer bg-circle pt-0 pb-5">
         <div className="container">
           <div className="text-center d-flex flex-column align-items-center mx-auto">
-            <span className="copyright-link fw-700 mb-3">DEX by Tegro</span>
+            <span className="copyright-link fw-700 mb-3">DEX by MegaPayer</span>
             <div className="soc-box d-flex align-items-center">
               <a
                 href="https://www.instagram.com/tegromoney/"

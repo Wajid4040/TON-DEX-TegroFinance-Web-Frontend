@@ -38,13 +38,13 @@ export const AuthButton = ({ isMobile = false }: AuthButtonProps) => {
         <>
           <img
             className="rounded-circle"
-            src="/static/ms-icon-310x310.png"
+            src="https://cache.tonapi.io/imgproxy/8leKEnEkM2PMVPk-EI1ZdQnpoScV33EnQeEkisrGAw0/rs:fill:200:200:1/g:no/aHR0cHM6Ly9tZWdhcGF5ZXIuaW8vd3AtY29udGVudC91cGxvYWRzL01lZ2FwYXllci1sb2dvdGlja2VyLnBuZw.webp"
             width={18}
             height={18}
-            alt="TGR"
+            alt="MPR"
           />
           <span className="fw-medium ms-2">
-            {Number(tgrBalance.toString()).toFixed(0)} TGR
+            {Number(tgrBalance.toString()).toFixed(0)} MPR
           </span>
           <i className="fa-solid fa-angle-down ms-3" />
         </>

@@ -10,14 +10,20 @@ import {
   useLoginMutation,
 } from "../store/api/authApiSlice";
 import { removeToken, updateToken } from "../store/features/authSlice";
-import { getCookie } from "../utils/cookie";
+import { getCookie, setCookie } from "../utils/cookie";
 
 const TokenCookieKey = import.meta.env.VITE_LOCAL_TOKEN_COOKIE_KEY ?? "";
 const REFERRAL_LINK_KEY = "ref";
 
 const getTokenCookie = () => {
   const token = getCookie(TokenCookieKey);
+  console.log("Retrieved token cookie:", token); // Log the retrieved token
   return token;
+};
+
+const setTokenCookie = (token: string) => {
+  console.log("Setting token cookie:", token);
+  setCookie(TokenCookieKey, token, { path: '/', expires: 1 }); // Adjust the options as needed
 };
 
 export function useAuth() {
@@ -40,20 +46,27 @@ export function useAuth() {
   const refreshPayload = async () => {
     tonConnectUI.setConnectRequestParameters({ state: "loading" });
 
-    const value = await getPayloadRequest().unwrap();
-    if (!value) {
-      tonConnectUI.setConnectRequestParameters({
-        state: "loading",
-      });
-    } else {
-      tonConnectUI.setConnectRequestParameters({
-        state: "ready",
-        value,
-      });
+    try {
+      const value = await getPayloadRequest().unwrap();
+      console.log("Payload value received, setting state to ready.", value);
+      if (!value) {
+        tonConnectUI.setConnectRequestParameters({
+          state: "loading",
+        });
+      } else {
+        tonConnectUI.setConnectRequestParameters({
+          state: "ready",
+          value,
+        });
+      }
+    } catch (error) {
+      console.error("Error in refreshPayload:", error);
+      tonConnectUI.setConnectRequestParameters({ state: "loading" }); // Default to loading state on error
     }
   };
 
   const removeTokenCookie = () => {
+    console.log("Removing token cookie and disconnecting UI.");
     dispatch(removeToken());
     document.cookie = `${TokenCookieKey}=; max-age=0; Expires=Thu, 01 Jan 1970 00:00:00 GMT`;
     if (tonConnectUI.connected) {
@@ -63,9 +76,12 @@ export function useAuth() {
 
   const checkTokenCookie = () => {
     const newToken = getTokenCookie();
+    console.log("Checking token cookie:", newToken);
     if (newToken) {
+      console.log("New token found, updating state.");
       dispatch(updateToken(newToken));
     } else if (tonConnectUI.connected) {
+      console.log("No token found, removing token cookie.");
       removeTokenCookie();
     }
   };
@@ -76,17 +92,20 @@ export function useAuth() {
 
   useEffect(() => {
     const cookieToken = getTokenCookie();
+    console.log("Initial cookie token:", cookieToken);
 
     if (cookieToken) {
+      console.log("Cookie token found on initial load, updating state.");
       dispatch(updateToken(cookieToken));
     }
 
     if (!isConnectionRestored) {
+      console.log("Connection not restored, returning early.");
       return;
     }
 
     if (!wallet) {
-      console.log("Hello error")
+      console.log("Wallet not connected. Removing token cookie.");
       removeTokenCookie();
 
       refreshPayload();
@@ -98,6 +117,7 @@ export function useAuth() {
     }
 
     if (cookieToken) {
+      console.log("Cookie token found, returning early.");
       return;
     }
 
@@ -105,6 +125,7 @@ export function useAuth() {
       wallet.connectItems?.tonProof &&
       !("error" in wallet.connectItems.tonProof)
     ) {
+      console.log("Ton proof found, proceeding with login request.");
       loginRequest({
         referral_code: localStorage.getItem(REFERRAL_LINK_KEY) ?? undefined,
         address: wallet.account.address,
@@ -122,10 +143,17 @@ export function useAuth() {
         },
       })
         .unwrap()
-        .then(() => {
+        .then((response) => {
+          console.log("Login request successful, setting token cookie.");
+          setTokenCookie(response.token); // Assuming response contains the token
           checkTokenCookie();
+        })
+        .catch(error => {
+          console.error("Login request failed:", error);
+          removeTokenCookie();
         });
     } else {
+      console.log("Ton proof error or missing.");
       removeTokenCookie();
       tonConnectUI.disconnect();
     }
